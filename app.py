@@ -58,6 +58,9 @@ def init_session_state():
         
     if 'last_update_time' not in st.session_state:
         st.session_state.last_update_time = time.time()
+        
+    if 'rerun_requested' not in st.session_state:
+        st.session_state.rerun_requested = False
 
 # Spawn drone swarms
 def spawn_drones():
@@ -653,12 +656,12 @@ def main():
         if st.session_state.simulation_running:
             if st.button("⏹️ Stop Simulation"):
                 st.session_state.simulation_running = False
-                st.experimental_rerun()
+                st.session_state.rerun_requested = True
         else:
             if st.button("▶️ Start Simulation"):
                 st.session_state.simulation_running = True
                 st.session_state.last_update_time = time.time()
-                st.experimental_rerun()
+                st.session_state.rerun_requested = True
     
     with col2:
         st.session_state.zoom_level = st.slider(
@@ -682,26 +685,26 @@ def main():
                 manual_assign_interceptor(target_id, st.session_state.ml_model)
             
             st.session_state.display_mode = 'Selected Target'
-            st.experimental_rerun()
+            st.session_state.rerun_requested = True
     
     if track_all_btn:
         if not st.session_state.targets.empty:
             st.session_state.targets.loc[st.session_state.targets['status'].isin(['Tracking', 'Prioritized']), 'status'] = 'Tracking'
             st.session_state.command_log.append(f"{time.strftime('%H:%M:%S')}: All drones set to Tracking")
             st.session_state.display_mode = 'All Drones'
-            st.experimental_rerun()
+            st.session_state.rerun_requested = True
     
     if assign_btn:
         target_id = st.session_state.selected_target
         if target_id and target_id in st.session_state.targets['id'].values:
             manual_assign_interceptor(target_id, st.session_state.ml_model)
             st.session_state.display_mode = 'Selected Target'
-            st.experimental_rerun()
+            st.session_state.rerun_requested = True
     
     if auto_assign_btn:
         assign_interceptors(auto_all=True)
         st.session_state.command_log.append(f"{time.strftime('%H:%M:%S')}: Automatic assignment triggered for all prioritized drones")
-        st.experimental_rerun()
+        st.session_state.rerun_requested = True
     
     # Run simulation step if running
     if st.session_state.simulation_running:
@@ -709,7 +712,7 @@ def main():
         if current_time - st.session_state.last_update_time >= 1.0:
             run_simulation_step()
             st.session_state.last_update_time = current_time
-            st.experimental_rerun()
+            st.session_state.rerun_requested = True
     
     # Update UI state
     update_ui()
@@ -765,6 +768,11 @@ def main():
             st.dataframe(st.session_state.interceptors[['id', 'speed', 'range_capability', 'status', 'target_id']])
         else:
             st.info("No interceptors available")
+            
+    # Handle rerun requests at the end of the script
+    if st.session_state.rerun_requested:
+        st.session_state.rerun_requested = False
+        st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
