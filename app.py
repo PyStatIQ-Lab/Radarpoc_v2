@@ -646,19 +646,17 @@ def main():
             key='display_selector'
         )
     
-    # Simulation Control
+    # Simulation Control - UPDATED SECTION
     col1, col2 = st.columns([1, 3])
     
     with col1:
         if st.session_state.simulation_running:
             if st.button("⏹️ Stop Simulation"):
                 st.session_state.simulation_running = False
-                st.experimental_rerun()
         else:
             if st.button("▶️ Start Simulation"):
                 st.session_state.simulation_running = True
                 st.session_state.last_update_time = time.time()
-                st.experimental_rerun()
     
     with col2:
         st.session_state.zoom_level = st.slider(
@@ -666,6 +664,14 @@ def main():
             0.5, 2.0, 1.0, 0.1,
             key='zoom_slider'
         )
+    
+    # Run simulation step if running - UPDATED SECTION
+    if st.session_state.simulation_running:
+        current_time = time.time()
+        if current_time - st.session_state.last_update_time >= 1.0:
+            run_simulation_step()
+            st.session_state.last_update_time = current_time
+            st.experimental_rerun()  # Only rerun after updating
     
     # Handle button actions
     if execute_btn:
@@ -682,34 +688,22 @@ def main():
                 manual_assign_interceptor(target_id, st.session_state.ml_model)
             
             st.session_state.display_mode = 'Selected Target'
-            st.experimental_rerun()
     
     if track_all_btn:
         if not st.session_state.targets.empty:
             st.session_state.targets.loc[st.session_state.targets['status'].isin(['Tracking', 'Prioritized']), 'status'] = 'Tracking'
             st.session_state.command_log.append(f"{time.strftime('%H:%M:%S')}: All drones set to Tracking")
             st.session_state.display_mode = 'All Drones'
-            st.experimental_rerun()
     
     if assign_btn:
         target_id = st.session_state.selected_target
         if target_id and target_id in st.session_state.targets['id'].values:
             manual_assign_interceptor(target_id, st.session_state.ml_model)
             st.session_state.display_mode = 'Selected Target'
-            st.experimental_rerun()
     
     if auto_assign_btn:
         assign_interceptors(auto_all=True)
         st.session_state.command_log.append(f"{time.strftime('%H:%M:%S')}: Automatic assignment triggered for all prioritized drones")
-        st.experimental_rerun()
-    
-    # Run simulation step if running
-    if st.session_state.simulation_running:
-        current_time = time.time()
-        if current_time - st.session_state.last_update_time >= 1.0:
-            run_simulation_step()
-            st.session_state.last_update_time = current_time
-            st.experimental_rerun()
     
     # Update UI state
     update_ui()
