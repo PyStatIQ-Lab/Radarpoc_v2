@@ -593,7 +593,7 @@ def main():
     init_session_state()
     
     # Header
-    st.title("🚀 Quantum Radar Mission Simulator")
+    st.title("Quantum Radar Mission Simulator")
     st.markdown("---")
     
     # Control Panel
@@ -651,10 +651,10 @@ def main():
     
     with col1:
         if st.session_state.simulation_running:
-            if st.button("⏹️ Stop Simulation"):
+            if st.button("Stop Simulation"):
                 st.session_state.simulation_running = False
         else:
-            if st.button("▶️ Start Simulation"):
+            if st.button("Start Simulation"):
                 st.session_state.simulation_running = True
                 st.session_state.last_update_time = time.time()
     
@@ -709,7 +709,7 @@ def main():
     update_ui()
     
     # Data Feed
-    st.subheader("📡 Tactical Data Feed")
+    st.subheader("Tactical Data Feed")
     data_feed_container = st.container()
     with data_feed_container:
         if st.session_state.get('data_feed'):
@@ -719,7 +719,7 @@ def main():
             st.markdown("<div class='data-feed'>No active engagements</div>", unsafe_allow_html=True)
     
     # Plots
-    st.subheader("📊 Tactical Display")
+    st.subheader("Tactical Display")
     if not st.session_state.targets.empty:
         fig = create_tactical_plots()
         st.pyplot(fig)
@@ -727,7 +727,7 @@ def main():
         st.info("No targets detected. Waiting for drone swarm...")
     
     # Command Log
-    st.subheader("📝 Command History")
+    st.subheader("Command History")
     log_container = st.container()
     with log_container:
         log_html = "<div class='log-panel'>"
@@ -747,14 +747,14 @@ def main():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("🎯 Targets")
+        st.subheader("Targets")
         if not st.session_state.targets.empty:
             st.dataframe(st.session_state.targets[['id', 'range', 'bearing', 'elevation', 'threat_level', 'status']])
         else:
             st.info("No targets detected")
     
     with col2:
-        st.subheader("🛡️ Interceptors")
+        st.subheader("Interceptors")
         if not st.session_state.interceptors.empty:
             st.dataframe(st.session_state.interceptors[['id', 'speed', 'range_capability', 'status', 'target_id']])
         else:
